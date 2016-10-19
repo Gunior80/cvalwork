@@ -1,5 +1,7 @@
+#!/usr/bin/python3
 from constants import *
 from algorithm import *
+from categories import *
 
 
 

@@ -19,28 +19,31 @@ class Generator:
         self.empty = empty
         self.available_words = available_words
         self.used_words = []
-        self.sort_word_list()
         self.cols = cols
         self.rows = rows
-        self.clear_grid()
-        self.generate_crossword()
 
     def clear_grid(self):
         '''Создать(очистить) Грид(поле кроссворда) и заполнить "пустыми" знаками'''
         self.grid = [[self.empty for j in range(self.cols)] for i in range(self.rows)]
 
-    def sort_word_list(self):  # Сортируем слова по длинне
+    def sort_words(self):  # Сортируем слова по длинне
         temp_list = []
         for word in self.available_words:
             temp_list.append(Word(word))
         temp_list.sort(key=lambda i: len(i.word), reverse=True)  # Сортировать от большего к меньшему.
         self.available_words = temp_list
 
-    def generate_crossword(self):
-        self.current_word_list = []
-        for word in self.available_words:
-            if word not in self.current_word_list:
-                self.fill_grid(word)
+    def generate_crossword(self, CountWords=0):
+        if CountWords < 0 or CountWords > len(self.available_words): # Проверка на корректность количества слов
+            CountWords = len(self.available_words)
+        self.clear_grid()
+        self.sort_words()
+        tempList = self.available_words
+        genWordsList = []
+        for wordNum in range(CountWords):
+            genWordsList.append(tempList.pop(random.randint(0,len(tempList)-1))) # Помещение в список заданного количества случайных слов
+        for word in genWordsList:
+            self.fill_grid(word)
 
     def fill_grid(self, word):
         count = 0
@@ -56,7 +59,7 @@ class Generator:
                 else:
                     return
             else:
-                coordlist = self.suggest_coord(word)
+                coordlist = self.find_coord(word)
                 try:
                     col, row, vertical = coordlist[count][0], coordlist[count][1], coordlist[count][2]
                 except IndexError:
@@ -66,7 +69,7 @@ class Generator:
                     self.set_word(col, row, vertical, word, force=True)
             count +=1
 
-    def suggest_coord(self, word):
+    def find_coord(self, word):
         coordlist = []
         c_pos = -1                       # Позиция символа в слове (изначально -1)
         for given_char in word.word:     # Перебираем символы слова
@@ -98,14 +101,13 @@ class Generator:
         new_coordlist = []
         for coord in coordlist:
             col, row, vertical = coord[0], coord[1], coord[2]
-            coord[4] = self.check_fit_score(col, row, vertical, word)
+            coord[4] = self.check_fit(col, row, vertical, word)
             if coord[4]:
                 new_coordlist.append(coord)
         random.shuffle(new_coordlist)
-        new_coordlist.sort(key=lambda i: i[4], reverse=True)
         return new_coordlist
 
-    def check_fit_score(self, col, row, vertical, word):
+    def check_fit(self, col, row, vertical, word):
         if col < 1 or row < 1:
             return 0
         count, score = 1, 1
@@ -126,34 +128,34 @@ class Generator:
             if vertical:
                 # Проверка возможности вставить слово по вертикали
                 if active_cell != letter:  # условие для первой буквы
-                    if not self.check_if_cell_clear(col + 1, row):  # Проверка правой позиции
+                    if not self.check_clear(col + 1, row):  # Проверка правой позиции
                         return 0
 
-                    if not self.check_if_cell_clear(col - 1, row):  # Проверка левой позиции
+                    if not self.check_clear(col - 1, row):  # Проверка левой позиции
                         return 0
 
                 if count == 1:  # Проверка верхней позиции относительно первой буквы
-                    if not self.check_if_cell_clear(col, row - 1):
+                    if not self.check_clear(col, row - 1):
                         return 0
 
                 if count == len(word.word):  # Проверка нижней позиции относительно последней буквы
-                    if not self.check_if_cell_clear(col, row + 1):
+                    if not self.check_clear(col, row + 1):
                         return 0
             else:
                 # Проверка возможности вставить слово по горизонтали
                 if active_cell != letter:  # условие для первой буквы
-                    if not self.check_if_cell_clear(col, row - 1):  # Проверка верхней позиции
+                    if not self.check_clear(col, row - 1):  # Проверка верхней позиции
                         return 0
 
-                    if not self.check_if_cell_clear(col, row + 1):  # Проверка нижней позиции
+                    if not self.check_clear(col, row + 1):  # Проверка нижней позиции
                         return 0
 
                 if count == 1:  # Проверка левой позиции относительно первой буквы
-                    if not self.check_if_cell_clear(col - 1, row):
+                    if not self.check_clear(col - 1, row):
                         return 0
 
                 if count == len(word.word):  # Проверка правой позиции относительно последней буквы
-                    if not self.check_if_cell_clear(col + 1, row):
+                    if not self.check_clear(col + 1, row):
                         return 0
 
             if vertical:
@@ -178,7 +180,7 @@ class Generator:
                     col += 1
         return
 
-    def check_if_cell_clear(self, col, row):
+    def check_clear(self, col, row):
         # Проверка незанятости поля
         try:
             cell = self.grid[row - 1][col - 1]
@@ -187,3 +189,13 @@ class Generator:
         except IndexError:
             pass
         return False
+
+if __name__ == '__main__':
+    rows = 20
+    columns = 20
+    word_list = ['процесс', 'клавиатура', 'поток', 'компилятор',
+                 'байткод', 'растр', 'видеокарта', 'регистр', 'ядро']
+    a = Generator(rows, columns, ' ', word_list)
+    a.generate_crossword(3)
+    for i in a.grid:
+        print(i)

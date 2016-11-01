@@ -34,8 +34,11 @@ class Generator:
         self.available_words = temp_list
 
     def generate_crossword(self, CountWords=0):
-        if CountWords < 0 or CountWords > len(self.available_words): # Проверка на корректность количества слов
-            CountWords = len(self.available_words)
+        if CountWords <= 0 or CountWords > len(self.available_words): # Проверка на корректность количества слов
+            if len(self.available_words) < 10:
+                CountWords = len(self.available_words)
+            else:
+                CountWords = 10
         self.clear_grid()
         self.sort_words()
         tempList = self.available_words
@@ -190,12 +193,41 @@ class Generator:
             pass
         return False
 
+    def check_list(self, list):
+        ''' Функция проверки строки или столбца на возможность удаления'''
+        #print(list)
+        for letter in list:
+            if letter != self.empty:
+                return False
+        return True
+
+
+    def format_grid(self):
+        '''Функция удаления строк и столбцов'''
+        CurrentRow = 0 # Сначала удаляем пустые строки
+        while CurrentRow < len(self.grid):
+            if self.check_list(self.grid[CurrentRow]):
+                self.grid.remove(self.grid[CurrentRow])
+            else:
+                CurrentRow += 1
+        '''
+        CurrentCol = 0 # Потом пустые столбцы
+        while CurrentCol < len(self.grid[0]):
+            if self.check_list([self.grid[row][CurrentCol] for row in range(len(self.grid))]):
+                for row in range(len(self.grid)):
+                    self.grid[row].remove(self.grid[row][CurrentCol])
+            else:
+                CurrentCol += 1
+        '''
+
+
 if __name__ == '__main__':
     rows = 20
     columns = 20
     word_list = ['процесс', 'клавиатура', 'поток', 'компилятор',
                  'байткод', 'растр', 'видеокарта', 'регистр', 'ядро']
     a = Generator(rows, columns, ' ', word_list)
-    a.generate_crossword(3)
+    a.generate_crossword()
+    a.format_grid()
     for i in a.grid:
         print(i)

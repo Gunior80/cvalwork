@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 import random
 
 
@@ -15,12 +16,12 @@ class Word:
             return 'По Горизонтали'
 
 class Generator:
-    def __init__(self, cols, rows, empty=' ', available_words=[]):
+    def __init__(self, size, empty=' ', available_words=[]):
         self.empty = empty
         self.available_words = available_words
         self.used_words = []
-        self.cols = cols
-        self.rows = rows
+        self.cols = size
+        self.rows = size
 
     def clear_grid(self):
         '''Создать(очистить) Грид(поле кроссворда) и заполнить "пустыми" знаками'''
@@ -210,23 +211,23 @@ class Generator:
                 self.grid.remove(self.grid[CurrentRow])
             else:
                 CurrentRow += 1
-        '''
+        
         CurrentCol = 0 # Потом пустые столбцы
         while CurrentCol < len(self.grid[0]):
             if self.check_list([self.grid[row][CurrentCol] for row in range(len(self.grid))]):
-                for row in range(len(self.grid)):
-                    self.grid[row].remove(self.grid[row][CurrentCol])
+                 for row in range(len(self.grid)):
+                     self.grid[row].pop(CurrentCol)
             else:
                 CurrentCol += 1
-        '''
+        
 
 
 if __name__ == '__main__':
-    rows = 20
-    columns = 20
+    
     word_list = ['процесс', 'клавиатура', 'поток', 'компилятор',
-                 'байткод', 'растр', 'видеокарта', 'регистр', 'ядро']
-    a = Generator(rows, columns, ' ', word_list)
+                 'байткод', 'растр', 'видеокарта', 'регистр', 'ядро','ораораропао','прмпрпас']
+    size = len(word_list)**2 - len(word_list)
+    a = Generator(size, ' ', word_list)
     a.generate_crossword()
     a.format_grid()
     for i in a.grid:

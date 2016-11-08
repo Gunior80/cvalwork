@@ -1,14 +1,13 @@
-#!/usr/bin/python3
-from constants import *
-from algorithm import *
-from categories import *
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+
+from logic import Driver
+
+
+program = Driver()
+program.run()
 
 
 
-
-a = Generator(rows, columns, ' ', word_list)
-
-for i in a.grid:
-    print(i)
 
 

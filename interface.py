@@ -1,10 +1,9 @@
+#/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-try:
-    import gi
-    gi.require_version('Gtk', '3.0')
-    from gi.repository import Gtk, Gdk
-except:
-    pass
+import pygtk
+pygtk.require('2.0')
+import gtk
 
 UI_INFO = """
 <ui>
@@ -13,7 +12,7 @@ UI_INFO = """
       <menuitem action='FileQuit'/>
     </menu>
     <menu action='EditMenu'>
-      <menuitem action='NetworkSettings'/>
+      <menuitem action='SettingsCategories'/>
     </menu>
     <menu action='AboutMenu'>
       <menuitem action='About' />
@@ -22,27 +21,29 @@ UI_INFO = """
 </ui>
 """
 
-class Window(Gtk.Window):
+class Window(gtk.Window):
     def __init__(self):
-        Gtk.Window.__init__(self, title="Генератор кроссвордов")
-        self.set_default_size(500, 500)
+        gtk.Window.__init__(self)
+        self.set_size_request(500, 500)
+        self.set_position(gtk.WIN_POS_CENTER)
+        
         ui_manager = self.create_ui_manager()
         menubar = ui_manager.get_widget("/MenuBar")
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box = gtk.VBox()
         box.pack_start(menubar, False, False, 0)
 
-        self.grid = Gtk.Fixed()
+        self.a = gtk.DrawingArea()
+        self.a.set_size_request(20,20)
+        
 
-        box.pack_start(self.grid, True, True, 0)
         self.add(box)
-
     def create_ui_manager(self):
-        ui_manager = Gtk.UIManager()
+        ui_manager = gtk.UIManager()
         ui_manager.add_ui_from_string(UI_INFO)
         accelgroup = ui_manager.get_accel_group()
         self.add_accel_group(accelgroup)
-        action_group = Gtk.ActionGroup()
+        action_group = gtk.ActionGroup('MenuBar')
         self.add_file_menu_actions(action_group)
         self.add_edit_menu_actions(action_group)
         self.add_about_menu_actions(action_group)
@@ -50,27 +51,27 @@ class Window(Gtk.Window):
         return ui_manager
 
     def add_file_menu_actions(self, action_group):
-        action_filemenu = Gtk.Action("FileMenu", 'Меню')
+        action_filemenu = gtk.Action("FileMenu", 'Меню', None, None)
         action_group.add_action(action_filemenu)
-        action_filequit = Gtk.Action("FileQuit", 'Выход', None, Gtk.STOCK_QUIT)
+        action_filequit = gtk.Action("FileQuit", 'Выход', None, gtk.STOCK_QUIT)
         action_group.add_action(action_filequit)
-        action_filequit.connect("activate", Gtk.main_quit)
+        action_filequit.connect("activate", gtk.main_quit)
 
     def add_edit_menu_actions(self, action_group):
-        action_editmenu = Gtk.Action("EditMenu", "Настройки")
+        action_editmenu = gtk.Action("EditMenu", "Настройки", None, None)
         action_group.add_action(action_editmenu)
-        action_about = Gtk.Action("NetworkSettings", 'Настройки сети', None, None)
+        action_about = gtk.Action("SettingsCategories", 'Настройки категорий и слов', None, None)
         action_group.add_action(action_about)
 
     def add_about_menu_actions(self, action_group):
-        action_aboutmenu = Gtk.Action("AboutMenu", 'Справка')
+        action_aboutmenu = gtk.Action("AboutMenu", 'Справка', None, None)
         action_group.add_action(action_aboutmenu)
-        action_about = Gtk.Action("About", 'О программе', None, Gtk.STOCK_ABOUT)
+        action_about = gtk.Action("About", 'О программе', None, gtk.STOCK_ABOUT)
         action_group.add_action(action_about)
 
 
 if __name__ == '__main__':
     window = Window()
-    window.connect("delete-event", Gtk.main_quit)
+    window.connect("delete-event", gtk.main_quit)
     window.show_all()
-    Gtk.main()
+    gtk.main()

@@ -1,5 +1,5 @@
-#!/usr/bin/python3
-
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import random
 
 
@@ -48,6 +48,7 @@ class Generator:
             genWordsList.append(tempList.pop(random.randint(0,len(tempList)-1))) # Помещение в список заданного количества случайных слов
         for word in genWordsList:
             self.fill_grid(word)
+        self.format_grid()
 
     def fill_grid(self, word):
         count = 0
@@ -229,6 +230,5 @@ if __name__ == '__main__':
     size = len(word_list)**2 - len(word_list)
     a = Generator(size, ' ', word_list)
     a.generate_crossword()
-    a.format_grid()
     for i in a.grid:
         print(i)

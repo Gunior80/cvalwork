@@ -23,10 +23,10 @@ UI_INFO = """
 """
 
 
-class Window(gtk.Window):
+class MainWindow(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
-        #self.set_size_request(500, 500)
+        self.set_size_request(700, 500)
         self.set_position(gtk.WIN_POS_CENTER)
         ui_manager = self.create_ui_manager()
         menubar = ui_manager.get_widget("/MenuBar")
@@ -37,6 +37,8 @@ class Window(gtk.Window):
         switch_button = gtk.Button('Заполнен/Пустой')
         save_button = gtk.Button('Сохранить')
         rigth_box = gtk.VBox()
+        combo_label = gtk.Label("Категория")
+        self.combo = gtk.Combo()
         gen_button = gtk.Button('Сгенерировать')
 
         '''draw'''
@@ -44,14 +46,16 @@ class Window(gtk.Window):
         self.drawing_area.set_size_request(200, 200)
         self.drawing_area.show()
 
-        '''upackovka'''
-        left_box.pack_start(self.drawing_area)
-        left_box.pack_start(buttons_box)
+        '''pack'''
         buttons_box.pack_start(switch_button)
         buttons_box.pack_start(save_button)
-        rigth_box.pack_start(gen_button)
+        left_box.pack_start(self.drawing_area)
+        left_box.pack_start(buttons_box, expand =False)
+        rigth_box.pack_start(combo_label, expand =False)
+        rigth_box.pack_start(self.combo, expand =False)
+        rigth_box.pack_start(gen_button, expand =False)
         work_box.pack_start(left_box)
-        work_box.pack_start(rigth_box)
+        work_box.pack_start(rigth_box, expand =False)
         main_box.pack_start(menubar, False, False, 0)
         main_box.pack_start(work_box)
         self.add(main_box)
@@ -61,6 +65,7 @@ class Window(gtk.Window):
         switch_button.connect("clicked", self.on_switch_button_click)
         save_button.connect("clicked", self.on_save_button_click)
         gen_button.connect("clicked", self.on_gen_button_click)
+        self.connect('check-resize', self.redraw)
 
     def create_ui_manager(self):
         ui_manager = gtk.UIManager()
@@ -145,9 +150,60 @@ class Window(gtk.Window):
         '''Переопределяемый метод нажатия кнопки генерации кроссворда'''
         pass
 
+class SettingsWindow(gtk.Window):
+    def __init__(self):
+        gtk.Window.__init__(self)
+        #self.set_size_request(500, 700)
+        self.set_position(gtk.WIN_POS_CENTER)
+        work_box  = gtk.VBox()
+
+        labels_box = gtk.HBox()
+        left_label = gtk.Label('   Список \n категорий')
+        right_label = gtk.Label('Список слов\nв категории')
+
+        lists_box = gtk.HBox()
+        left_box = gtk.VBox()
+        scroller_categories = gtk.ScrolledWindow()
+        scroller_categories.show()
+        categories_list = gtk.List()
+        scroller_categories.add_with_viewport(categories_list)
+
+        right_box = gtk.VBox()
+
+        scroller_words = gtk.ScrolledWindow()
+        scroller_words.show()
+        words_list = gtk.List()
+        scroller_words.add_with_viewport(words_list)
+
+        ok_button = gtk.Button('ОК')
+
+
+
+        left_box.pack_start(scroller_categories)
+        lists_box.pack_start(left_box)
+
+
+        right_box.pack_start(scroller_words)
+        lists_box.pack_start(right_box)
+
+        labels_box.pack_start(left_label)
+        labels_box.pack_start(right_label)
+        work_box.pack_start(labels_box, expand =False)
+        work_box.pack_start(lists_box)
+        work_box.pack_start(ok_button, False, False)
+        self.add(work_box)
+
+        ok_button.connect("clicked", self.on_ok_button_click)
+        categories_list.connect("selection_changed", self.on_category_select)
+
+    def on_ok_button_click(self, event):
+        self.hide()
+
+    def on_category_select(self, gtklist, event, frame):
+        pass
 
 if __name__ == '__main__':
-    window = Window()
+    window = MainWindow()
     window.connect("delete-event", gtk.main_quit)
     window.show_all()
     gtk.main()

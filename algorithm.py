@@ -5,7 +5,7 @@ import random
 
 class Word:
     def __init__(self, word=None):
-        self.word = word.lower()
+        self.word = unicode(word.lower(),'utf-8')
         self.length = len(self.word)
         self.vertical = None
 

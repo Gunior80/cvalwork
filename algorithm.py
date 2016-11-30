@@ -5,7 +5,7 @@ import random
 
 class Word:
     def __init__(self, word=None):
-        self.word = unicode(word.lower(),'utf-8')
+        self.word = word.lower()
         self.length = len(self.word)
         self.vertical = None
 
@@ -16,15 +16,14 @@ class Word:
             return 'По Горизонтали'
 
 class Generator:
-    def __init__(self, size, empty=' ', available_words=[]):
+    def __init__(self, empty='-', available_words=[]):
         self.empty = empty
         self.available_words = available_words
         self.used_words = []
-        self.cols = size
-        self.rows = size
 
-    def clear_grid(self):
+    def clear_grid(self, CountWords):
         '''Создать(очистить) Грид(поле кроссворда) и заполнить "пустыми" знаками'''
+        self.cols = self.rows = CountWords * 5
         self.grid = [[self.empty for j in range(self.cols)] for i in range(self.rows)]
 
     def sort_words(self):  # Сортируем слова по длинне
@@ -34,13 +33,13 @@ class Generator:
         temp_list.sort(key=lambda i: len(i.word), reverse=True)  # Сортировать от большего к меньшему.
         self.available_words = temp_list
 
-    def generate_crossword(self, CountWords=0):
+    def generate_crossword(self, CountWords=0, iterations = 3):
         if CountWords <= 0 or CountWords > len(self.available_words): # Проверка на корректность количества слов
             if len(self.available_words) < 10:
                 CountWords = len(self.available_words)
             else:
                 CountWords = 10
-        self.clear_grid()
+        self.clear_grid(CountWords)
         self.sort_words()
         tempList = self.available_words
         genWordsList = []
@@ -228,7 +227,7 @@ if __name__ == '__main__':
     word_list = ['процесс', 'клавиатура', 'поток', 'компилятор',
                  'байткод', 'растр', 'видеокарта', 'регистр', 'ядро','ораораропао','прмпрпас']
     size = len(word_list)**2 - len(word_list)
-    a = Generator(size, ' ', word_list)
+    a = Generator('-', word_list)
     a.generate_crossword()
     for i in a.grid:
         print(i)

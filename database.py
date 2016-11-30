@@ -1,20 +1,32 @@
-#!/usr/bin/python3
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import sqlite3
 
 '''
 Функции для работы с базой данных SQLlite
 '''
 
-def get_words(category): # Получить слова из БД
+def get_categories(): # Получить список пользовательских категорий
     conn = sqlite3.connect('dict.db')
     c = conn.cursor()
-    c.execute('SELECT id_category FROM categories WHERE name_category = ?;', (category))
-    id_cat = c.fetchone()
-    c.execute('SELECT word FROM words WHERE id_category = ?;',(cat))
+    c.execute('SELECT name_category FROM categories;')
     data = c.fetchall()
     c.close()
     conn.close()
-    return data
+    return [unicode(i[0]) for i in data]
+
+def get_words(category): # Получить слова из БД
+    conn = sqlite3.connect('dict.db')
+    c = conn.cursor()
+    c.execute('SELECT id_category FROM categories WHERE name_category = "%s";' % category)
+    id_cat = c.fetchone()
+    c.close()
+    c = conn.cursor()
+    c.execute('SELECT word FROM words WHERE id_category = %d;' %(id_cat))
+    data = c.fetchall()
+    c.close()
+    conn.close()
+    return [unicode(i[0]) for i in data]
 
 def set_words(category, words=[]): # Занести слова в БД
     conn = sqlite3.connect('dict.db')
@@ -39,15 +51,6 @@ def set_words(category, words=[]): # Занести слова в БД
         c.close()
         conn.close()
         set_words(category, words)
-            
-def get_categories(): # Получить список пользовательских категорий
-    conn = sqlite3.connect('dict.db')
-    c = conn.cursor()
-    c.execute('SELECT name_category FROM categories;')
-    data = c.fetchall()
-    c.close()
-    conn.close() 
-    return data
 
 def delete_word(id_cat, word): # Удалить слово из категории
     conn = sqlite3.connect('dict.db')

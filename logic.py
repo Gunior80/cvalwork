@@ -5,15 +5,46 @@ import gtk, pango
 
 from interface import MainWindow, SettingsWindow
 from algorithm import *
+from database import *
 
 class Settings(SettingsWindow):
-    pass
+    def __init__(self):
+        SettingsWindow.__init__(self)
+
+
+    def on_ok_button_click(self, event):
+        list_cat = get_categories()
+        for cat in list_cat:
+            Driver().combo.append_text(cat)
+        self.hide()
+
+    def on_add_word_click(self, event):
+        pass
+
+    def on_rm_word_click(self, event):
+        pass
+
+    def on_add_cat_click(self, event):
+        pass
+
+    def on_rm_cat_click(self, event):
+        pass
+
+    def on_category_select(self, gtklist, event, frame):
+        pass
+
+    def on_word_select(self, gtklist, event, frame):
+        pass
 
 class Driver(MainWindow):
     def __init__(self):
         MainWindow.__init__(self)
         self.last_gen_list = [[]]
         self.filled = False
+
+        cat_list = get_categories()
+        for cat in cat_list:
+            self.combo.append_text(cat)
 
 
     def on_settings_click(self, event):
@@ -46,24 +77,35 @@ class Driver(MainWindow):
             dialog.add_filter(filter)
             response = dialog.run()
             if response == gtk.RESPONSE_OK:
-                pixbuf.save('path', "jpeg")
+                pixbuf.save('path'+'.jpg', "jpeg")
             elif response == gtk.RESPONSE_CANCEL:
                 pass
             dialog.destroy()
 
     def on_gen_button_click(self, event):
-        word_list = ['байткод', 'растр', 'видеокарта', 'регистр', 'фывфыы', 'ораораропао', 'прмпрпас',
-                     'байткод', 'растр', 'видеокарта', 'регистр', 'апвпавап', 'ораораропао', 'прмпрпас',
-                     'байткод', 'растр', 'видеокарта', 'регистр', 'ждфлывжфдлыв', 'ораораропао', 'прмпрпас']
 
-        size = len(word_list) * 10
-        a = Generator(size, '-', word_list)
-        a.generate_crossword()
+        word_list = get_words(self.current_cat)
+        for i in word_list:
+            print(i)
+
+        a = Generator('-', word_list)
+        a.generate_crossword(int(self.adj.get_value()))
+        print(len(a.used_words))
         self.last_gen_list = a.grid
         self.draw(self.last_gen_list, self.filled)
 
-    def draw(self, list, filled):
+    def clear_model(self, combobox):
+        model = combobox.get_model()
+        model.clear()
 
+    def value_changed(self, combobox):
+        '''Переопределяемый метод выбора категории'''
+        model = combobox.get_model()
+        index = combobox.get_active()
+        if index >= 0:
+            self.current_cat = model[index][0]
+
+    def draw(self, list, filled):
         self.configure_event(self.drawing_area, None)
         x0 = self.null_x
         y0 = self.null_y
@@ -90,9 +132,6 @@ class Driver(MainWindow):
                     if self.filled == True:
 
                         pango_layout.set_text(list[y1][x1])
-
-                        print(pango_layout.get_width())
-                        #pango_layout.set_alignment(pango.ALIGN_LEFT)
                         self.pixmap.draw_layout(self.drawing_area.get_style().black_gc, x0 + (x1 * s)+s//3, y0 + (y1 * s), pango_layout)
                     self.queue_draw()
 

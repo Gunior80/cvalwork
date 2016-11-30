@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
-
+import pygtk
 import gtk
 from logic import Driver
 

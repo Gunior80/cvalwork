@@ -33,7 +33,7 @@ class Generator:
         temp_list.sort(key=lambda i: len(i.word), reverse=True)  # Сортировать от большего к меньшему.
         self.available_words = temp_list
 
-    def generate_crossword(self, CountWords=0, iterations = 3):
+    def generate_crossword(self, CountWords=0):
         if CountWords <= 0 or CountWords > len(self.available_words): # Проверка на корректность количества слов
             if len(self.available_words) < 10:
                 CountWords = len(self.available_words)
@@ -47,7 +47,7 @@ class Generator:
             genWordsList.append(tempList.pop(random.randint(0,len(tempList)-1))) # Помещение в список заданного количества случайных слов
         for word in genWordsList:
             self.fill_grid(word)
-        self.format_grid()
+        
 
     def fill_grid(self, word):
         count = 0
@@ -219,15 +219,3 @@ class Generator:
                      self.grid[row].pop(CurrentCol)
             else:
                 CurrentCol += 1
-        
-
-
-if __name__ == '__main__':
-    
-    word_list = ['процесс', 'клавиатура', 'поток', 'компилятор',
-                 'байткод', 'растр', 'видеокарта', 'регистр', 'ядро','ораораропао','прмпрпас']
-    size = len(word_list)**2 - len(word_list)
-    a = Generator('-', word_list)
-    a.generate_crossword()
-    for i in a.grid:
-        print(i)

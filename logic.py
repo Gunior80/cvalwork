@@ -1,7 +1,7 @@
 #/usr/bin/python
 #-*- coding: utf-8 -*-
 
-import gtk, pango
+import gtk, pango, threading,time
 
 from interface import MainWindow, SettingsWindow
 from algorithm import *
@@ -41,18 +41,20 @@ class Driver(MainWindow):
         MainWindow.__init__(self)
         self.last_gen_list = [[]]
         self.filled = False
-
         cat_list = get_categories()
         for cat in cat_list:
             self.combo.append_text(cat)
-
 
     def on_settings_click(self, event):
         settings = Settings()
         settings.show_all()
 
     def on_about_click(self, event):
-        pass
+        message = gtk.MessageDialog(type=gtk.MESSAGE_INFO)
+        ok_button = message.add_button(gtk.STOCK_OK, gtk.RESPONSE_OK)
+        ok_button.connect("clicked", lambda x: message.hide())
+        message.set_markup("This programm is sucks.")
+        message.run()
 
     def on_switch_button_click(self, event):
         if self.filled == False:
@@ -72,27 +74,36 @@ class Driver(MainWindow):
                                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_SAVE, gtk.RESPONSE_OK))
             dialog.set_default_response(gtk.RESPONSE_OK)
             filter = gtk.FileFilter()
+            filter.set_name("jpeg")
             filter.add_mime_type("image/jpeg")
             filter.add_pattern("*.jpg")
             dialog.add_filter(filter)
             response = dialog.run()
             if response == gtk.RESPONSE_OK:
-                pixbuf.save('path'+'.jpg', "jpeg")
+                filename = dialog.get_filename()
+                if not '.jpg' in filename:
+                    filename += '.jpg'
+                pixbuf.save(filename, "jpeg")
             elif response == gtk.RESPONSE_CANCEL:
                 pass
             dialog.destroy()
 
     def on_gen_button_click(self, event):
-
-        word_list = get_words(self.current_cat)
-        for i in word_list:
-            print(i)
-
-        a = Generator('-', word_list)
-        a.generate_crossword(int(self.adj.get_value()))
-        print(len(a.used_words))
-        self.last_gen_list = a.grid
-        self.draw(self.last_gen_list, self.filled)
+        try:
+            word_list = get_words(self.current_cat)
+            best = 0
+            for i in range(5):
+                a = Generator('-', word_list)
+                a.generate_crossword(int(self.adj.get_value()))
+                if (len(a.used_words) > best):
+                    best = len(a.used_words)
+                    b = a
+                
+            b.format_grid()
+            self.last_gen_list = b.grid
+            self.draw(self.last_gen_list, self.filled)
+        except:
+            pass
 
     def clear_model(self, combobox):
         model = combobox.get_model()
@@ -138,10 +149,3 @@ class Driver(MainWindow):
     def redraw(self,s):
         if self.last_gen_list != [[]]:
             self.draw(self.last_gen_list, self.filled)
-
-
-if __name__ == '__main__':
-    window = Driver()
-    window.connect("delete-event", gtk.main_quit)
-    window.show_all()
-    gtk.main()

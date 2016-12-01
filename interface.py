@@ -75,6 +75,7 @@ class MainWindow(gtk.Window):
         save_button.connect("clicked", self.on_save_button_click)
         gen_button.connect("clicked", self.on_gen_button_click)
         self.connect('check-resize', self.redraw)
+        self.connect('move-focus', self.redraw)
         self.combo.connect('changed', self.value_changed)
 
     def create_ui_manager(self):
@@ -257,9 +258,3 @@ class SettingsWindow(gtk.Window):
 
     def on_word_select(self, gtklist, event, frame):
         pass
-
-if __name__ == '__main__':
-    window = MainWindow()
-    window.connect("delete-event", gtk.main_quit)
-    window.show_all()
-    gtk.main()

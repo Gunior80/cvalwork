@@ -1,52 +1,127 @@
 #/usr/bin/python
 #-*- coding: utf-8 -*-
 
-import gtk, pango, threading,time
+import gtk, pango
 
 from interface import MainWindow, SettingsWindow
 from algorithm import *
 from database import *
 
 class Settings(SettingsWindow):
-    def __init__(self):
+    list_cat_key   = "list_cat_data"
+    list_words_key = "list_words_data"
+    def __init__(self, parent=None):
         SettingsWindow.__init__(self)
-
+        self.p = parent
+        column = gtk.TreeViewColumn()
+        cell = gtk.CellRendererText()
+        cats = get_categories()
+        self.cat_list.set_model(self.create_model(cats))
+        self.cat_list.set_rules_hint(False)
+        self.cat_list.append_column(column)
+        column.pack_start(cell, False)
+        column.add_attribute(cell, 'text', 0)
+        self.category = None
+        self.word = None
 
     def on_ok_button_click(self, event):
-        list_cat = get_categories()
-        for cat in list_cat:
-            Driver().combo.append_text(cat)
-        self.hide()
+        self.p.combo_fill()
+        self.destroy()
 
     def on_add_word_click(self, event):
-        pass
+        cat = self.value(self.cat_list.get_selection(), rm = False)
+        if cat != None:
+            word = self.right_entry.get_text()
+            if word != '':
+                self.set_value(self.words_list, word)
+                set_word(cat, word)
+                self.right_entry.set_text('')
 
     def on_rm_word_click(self, event):
-        pass
+        tree_selection = self.words_list.get_selection()
+        del_word = self.value(tree_selection)
+        cat = self.value(self.cat_list.get_selection(), rm = False)
+        delete_word(cat, del_word)
 
     def on_add_cat_click(self, event):
-        pass
+        cat = self.left_entry.get_text()
+        if cat != '':
+            self.set_value(self.cat_list, cat)
+            set_category(cat)
+            self.left_entry.set_text('')
 
     def on_rm_cat_click(self, event):
-        pass
+        tree_selection = self.cat_list.get_selection()
+        del_cat = self.value(tree_selection)
+        if del_cat == self.category:
+            self.words_list.get_model().clear()
+            self.words_list.remove_column(self.words_list.get_column(0))
+        delete_category(del_cat)
 
-    def on_category_select(self, gtklist, event, frame):
-        pass
+    def on_category_select(self, treeview, path, view_column):
+        try:
+            self.words_list.get_model().clear()
+            self.words_list.remove_column(self.words_list.get_column(0))
+        except AttributeError:
+            pass
+        model = treeview.get_model()
+        it = model.get_iter(path)
+        self.category = model.get_value(it, 0)        
+        cats = get_words(self.category)
+        if cats == None:
+            pass
+        else:
+            column = gtk.TreeViewColumn()
+            cell = gtk.CellRendererText()
+            self.words_list.set_model(self.create_model(cats))
+            self.words_list.set_rules_hint(True)
+            self.words_list.append_column(column)
+            column.pack_start(cell, True)
+            column.add_attribute(cell, 'text', 0)
 
-    def on_word_select(self, gtklist, event, frame):
-        pass
+    def value(self, tree_selection,rm = True):
+        model, path = tree_selection.get_selected_rows()
+        tree_iter = model.get_iter(path[0])
+        value = model.get_value(tree_iter,0)
+        if rm: model.remove(tree_iter)
+        return value
+    
+    def set_value(self, tree_selection, value):
+        model = tree_selection.get_model()
+        model.append([value])
+
+    def create_model(self, list = []):
+        store = gtk.ListStore(str)
+        for item in list:
+            store.append([item])
+        return store
 
 class Driver(MainWindow):
     def __init__(self):
         MainWindow.__init__(self)
         self.last_gen_list = [[]]
         self.filled = False
-        cat_list = get_categories()
-        for cat in cat_list:
-            self.combo.append_text(cat)
+        self.combo_fill()
+
+    def combo_fill(self):
+        try:
+            self.combo.clear()
+        except:
+            pass
+        list = get_categories()
+        store = gtk.ListStore(str)
+        for item in list:
+            store.append([item])
+
+        self.combo.set_model(store)
+        cell = gtk.CellRendererText()
+
+        self.combo.pack_start(cell)
+        self.combo.add_attribute(cell, 'text', 0)
+
 
     def on_settings_click(self, event):
-        settings = Settings()
+        settings = Settings(parent=self)
         settings.show_all()
 
     def on_about_click(self, event):
@@ -149,3 +224,6 @@ class Driver(MainWindow):
     def redraw(self,s):
         if self.last_gen_list != [[]]:
             self.draw(self.last_gen_list, self.filled)
+
+window = Driver()
+window.connect("delete-event", gtk.main_quit)

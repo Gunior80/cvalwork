@@ -3,7 +3,7 @@
 
 import pygtk
 import gtk
-from logic import Driver
+from logic import *
 
 
 if __name__ == '__main__':

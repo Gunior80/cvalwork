@@ -39,7 +39,7 @@ class MainWindow(gtk.Window):
         save_button = gtk.Button('Сохранить')
         right_box = gtk.VBox()
         combo_label = gtk.Label("Категория")
-        self.combo = gtk.combo_box_new_text()
+        self.combo = gtk.ComboBox()
         gen_button = gtk.Button('Сгенерировать')
         gen_button.set_size_request(0, 50)
         num_words_label = gtk.Label("Макс. кол-во слов\n по умолчанию 10")
@@ -183,7 +183,7 @@ class SettingsWindow(gtk.Window):
 
         scroller_categories = gtk.ScrolledWindow()
         scroller_categories.show()
-        self.cat_list = gtk.List()
+        self.cat_list = gtk.TreeView()
         scroller_categories.add_with_viewport(self.cat_list)
         self.left_entry = gtk.Entry()
         left_add_rm = gtk.HBox()
@@ -194,7 +194,7 @@ class SettingsWindow(gtk.Window):
 
         scroller_words = gtk.ScrolledWindow()
         scroller_words.show()
-        self.words_list = gtk.List()
+        self.words_list = gtk.TreeView()
         scroller_words.add_with_viewport(self.words_list)
         self.right_entry = gtk.Entry()
         right_add_rm = gtk.HBox()
@@ -235,8 +235,8 @@ class SettingsWindow(gtk.Window):
         rm_word.connect("clicked", self.on_rm_word_click)
         add_cat.connect("clicked", self.on_add_cat_click)
         rm_cat.connect("clicked", self.on_rm_cat_click)
-        self.cat_list.connect("selection_changed", self.on_category_select)
-        self.words_list.connect("selection_changed", self.on_word_select)
+        self.cat_list.connect("row-activated", self.on_category_select)
+
 
     def on_ok_button_click(self, event):
         pass
@@ -254,7 +254,4 @@ class SettingsWindow(gtk.Window):
         pass
 
     def on_category_select(self, gtklist, event, frame):
-        pass
-
-    def on_word_select(self, gtklist, event, frame):
         pass

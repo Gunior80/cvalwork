@@ -224,6 +224,3 @@ class Driver(MainWindow):
     def redraw(self,s):
         if self.last_gen_list != [[]]:
             self.draw(self.last_gen_list, self.filled)
-
-window = Driver()
-window.connect("delete-event", gtk.main_quit)
